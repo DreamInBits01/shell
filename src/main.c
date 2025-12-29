@@ -2,6 +2,15 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
+enum StateMachine
+{
+    NORMAL,
+    IN_WORD,
+    IN_QUOTES,
+    IN_SINGLE_QUOTES,
+    ESCAPED,
+    STATES_COUNT
+};
 enum Tokens
 {
     PIPELINE,
@@ -18,7 +27,6 @@ typedef struct
 void parse(char *line)
 {
     size_t index = 0;
-    bool in_quotes = false;
     int lastTokenType;
     Token tokens[10] = {0};
     char *token = strtok(line, " ");
