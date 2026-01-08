@@ -55,6 +55,10 @@ Example (ls || grep)
 */
 char look_ahead(char *input)
 {
+    /*
+        -The input must not be null
+        -The input must not be a null terminator as there's nothing after that
+    */
     if (input != NULL && *input != '\0')
     {
         return *(input + 1);
