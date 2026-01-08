@@ -55,11 +55,14 @@ Example (ls || grep)
 */
 char look_ahead(char *input)
 {
-    if (input != NULL)
+    if (input != NULL && *input != '\0')
     {
         return *(input + 1);
     }
-    return '\0';
+    else
+    {
+        return '\0';
+    }
 }
 LexerState lex_next_token(char **input)
 {
@@ -93,6 +96,11 @@ LexerState lex_next_token(char **input)
                 current_character_pointer++;
                 state = IN_PIPELINE_OR_OR;
             }
+            if (character == '>')
+            {
+                current_character_pointer++;
+                state = IN_REDIRECTION;
+            }
             if (character == '&')
             {
                 state = IN_AND;
@@ -103,6 +111,7 @@ LexerState lex_next_token(char **input)
                 state = IN_QUOTES;
                 current_character_pointer++;
             }
+
             if (character == '\'')
             {
                 state = IN_SINGLE_QUOTES;
@@ -115,6 +124,25 @@ LexerState lex_next_token(char **input)
                 buffer_index++;
                 current_character_pointer++;
             }
+            break;
+        case IN_REDIRECTION:
+            if (character == '>')
+            {
+                // REDIRECTION APPEND
+                current_character_pointer++;
+                *input = current_character_pointer;
+                printf("REDIRECTION_APPEND:>>\n");
+                return state;
+            }
+            else
+            {
+                // REDIRECTION
+                current_character_pointer++;
+                *input = current_character_pointer;
+                printf("REDIRECTION:>\n");
+                return state;
+            }
+
             break;
         case IN_PIPELINE_OR_OR:
             if (character == '|')
@@ -133,14 +161,14 @@ LexerState lex_next_token(char **input)
                 current_character_pointer++;
                 *input = current_character_pointer;
                 printf("OR:||\n");
-                return OR;
+                return state;
             }
             else
             {
                 current_character_pointer++;
                 *input = current_character_pointer;
                 printf("PIPELINE:|\n");
-                return PIPELINE;
+                return state;
             }
             break;
         case IN_AND:
@@ -160,7 +188,7 @@ LexerState lex_next_token(char **input)
                 printf("AND:&&\n");
                 current_character_pointer++;
                 *input = current_character_pointer;
-                return AND;
+                return state;
             }
             else
             {
@@ -234,7 +262,7 @@ LexerState lex_next_token(char **input)
             }
         }
     }
-    return TOKEN_EOF;
+    return (LexerState)TOKEN_EOF;
 }
 void tokenize_all(char *input)
 {
